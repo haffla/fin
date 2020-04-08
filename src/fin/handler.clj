@@ -9,15 +9,28 @@
             [fin.views.contents :as contents])
   (:gen-class))
 
+(def secret-password (or (System/getenv "SECRET_PASSWORD") "secret"))
+(def user-id "doesntmatterwhat")
+
 (defroutes app-routes
+  ; HOME PAGE
   (GET "/" {session :session}
-    (if (= "2222" (:user-id session))
+    (if (= user-id (:user-id session))
       (layout/application "Home" (contents/index))
       (redirect "/login")))
-  (GET "/login" {session :session}
-    (let [session (assoc session :user-id "2222")]
+  ; LOGIN
+  (POST "/session" {{password "password"} :form-params session :session}
+    (if (= password secret-password)
       (-> (redirect "/")
-          (assoc :session session))))
+          (assoc-in [:session :user-id] user-id))
+      (layout/application "PW FALSCH" (contents/login))))
+  ; LOGIN PAGE
+  (GET "/login" _ (layout/application "Login" (contents/login)))
+  ; LOGOUT
+  (DELETE "/session" {session :session}
+    (-> (redirect "/login")
+        (assoc :session nil)))
+
   (route/not-found (layout/application "Page Not Found" (contents/not-found))))
 
 ; (defn wrap-auth [handler]
