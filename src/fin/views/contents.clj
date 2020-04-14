@@ -3,11 +3,15 @@
         [ring.util.anti-forgery]))
 
 (defn index []
-  [:div {:id "content"}
+  [:div
    [:h1 "Home"]
    (form-to [:delete "/session"]
             (anti-forgery-field)
-            [:button {:type "submit"} "Logout"])])
+            [:button {:type "submit"} "Logout"])
+   (form-to {:enctype "multipart/form-data"} [:post "/file"]
+            (anti-forgery-field)
+            (file-upload "file")
+            [:button {:type "submit"} "Upload"])])
 
 (defn not-found []
   [:div
